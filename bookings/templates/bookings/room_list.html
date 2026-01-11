@@ -1,0 +1,70 @@
+{% extends 'bookings/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="m-0">Доступні кімнати</h2>
+            <form method="get" class="d-flex" style="gap: .5rem;">
+                {{ filter_form.type.label_tag }}
+                {{ filter_form.type }}
+                <button class="btn btn-outline-secondary" type="submit">Фільтр</button>
+            </form>
+        </div>
+        <div class="row">
+            {% for room in rooms %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ room.name }}</h5>
+                        <p class="card-text">
+                            <strong>Вмістимість:</strong> {{ room.capacity }} осіб<br>
+                            <strong>Ціна:</strong> {{ room.price_per_hour }} грн/год
+                        </p>
+                        <p class="text-muted small">{{ room.features }}</p>
+                        <a href="{% url 'room_detail' room.id %}" class="btn btn-sm btn-primary mt-2">Деталі / Забронювати</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-primary shadow">
+            <div class="card-body">
+                <h4 class="card-title">Забронювати</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="quick_book" value="1">
+                    <div class="mb-3">
+                        <label class="form-label">Оберіть кімнату</label>
+                        <select name="room" class="form-select">
+                            {% for room in rooms %}
+                                <option value="{{ room.id }}">{{ room.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Початок</label>
+                        <input type="datetime-local" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Кінець</label>
+                        <input type="datetime-local" name="end_time" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Підтвердити бронювання</button>
+                </form>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} mt-3">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

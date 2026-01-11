@@ -1,0 +1,14 @@
+/* Simple styling for BookingSystem */
+body {
+  background: #f8f9fa;
+}
+.navbar-brand { font-weight: 700; }
+.card.border-primary { border-width: 1px; }
+.container { padding-bottom: 2rem; }
+.alert { margin-top: 0.5rem; }
+.btn-outline-secondary { margin-top: 1rem; }
+.form-label { font-weight: 600; }
+/* Make datetime inputs full-width in small screens */
+@media (max-width: 575px) {
+  input[type=datetime-local] { width: 100%; }
+}

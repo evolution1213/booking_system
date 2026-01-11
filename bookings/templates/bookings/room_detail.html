@@ -1,0 +1,72 @@
+{% extends 'bookings/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">{{ room.name }}</h2>
+
+                <h5 class="mt-3">Опис та особливості</h5>
+                <p>{{ room.features|default:"Опис відсутній" }}</p>
+
+                <hr>
+                <div class="row text-center">
+                    <div class="col">
+                        <h4>{{ room.capacity }}</h4>
+                        <small class="text-muted">Місць</small>
+                    </div>
+                    <div class="col">
+                        <h4>{{ room.price_per_hour }} ₴</h4>
+                        <small class="text-muted">за годину</small>
+                    </div>
+                </div>
+
+                <hr>
+                <h5>Зайняті періоди (наступні 30 днів)</h5>
+                {% if bookings %}
+                    <ul>
+                        {% for b in bookings %}
+                            <li>{{ b.start_time|date:"d.m.Y H:i" }} — {{ b.end_time|date:"d.m.Y H:i" }} ({{ b.get_status_display }})</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Поки вільно.</p>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'room_list' %}" class="btn btn-outline-secondary">← Назад до списку</a>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Забронювати цю кімнату</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-success w-100 btn-lg">Підтвердити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
