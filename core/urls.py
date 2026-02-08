@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .views import home_redirect
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_redirect, name='home'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('rooms/', include('bookings.urls')),
+    path('bookings/api/rooms_map/', RedirectView.as_view(pattern_name='api_rooms_map', permanent=False)),
 ]

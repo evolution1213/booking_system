@@ -16,12 +16,43 @@ class RoomType(models.Model):
         return self.name
 
 
+class City(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Місто")
+    country = models.CharField(max_length=100, blank=True, verbose_name="Країна")
+
+    class Meta:
+        verbose_name = "Місто"
+        verbose_name_plural = "Міста"
+
+    def __str__(self):
+        return self.name
+
+
+class Location(models.Model):
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='locations', verbose_name="Місто")
+    name = models.CharField(max_length=100, verbose_name="Локація")
+    latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
+    longitude = models.FloatField(null=True, blank=True, verbose_name="Довгота")
+
+    class Meta:
+        verbose_name = "Локація"
+        verbose_name_plural = "Локації"
+
+    def __str__(self):
+        return f"{self.name}, {self.city.name}"
+
+
 class Room(models.Model):
     name = models.CharField(max_length=100, verbose_name="Назва кімнати")
     type = models.ForeignKey(RoomType, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Тип")
     capacity = models.IntegerField(verbose_name="Вмістимість")
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ціна за годину")
     features = models.TextField(blank=True, verbose_name="Особливості")
+    city = models.ForeignKey(City, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Місто")
+    location = models.ForeignKey(Location, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Локація")
+    # Cached coordinates copied from the linked Location for faster access and precise room positioning
+    latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
+    longitude = models.FloatField(null=True, blank=True, verbose_name="Довгота")
 
     def __str__(self):
         return self.name

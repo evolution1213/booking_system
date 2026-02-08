@@ -1,14 +1,23 @@
 from django.contrib import admin
-from .models import Room, Booking, RoomType
+from .models import Room, Booking, RoomType, City, Location
 
 @admin.register(RoomType)
 class RoomTypeAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'country')
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'city', 'latitude', 'longitude')
+    list_filter = ('city',)
+
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type', 'capacity', 'price_per_hour')
-    list_filter = ('type',)
+    list_display = ('name', 'type', 'capacity', 'price_per_hour', 'city', 'location')
+    list_filter = ('type', 'city')
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

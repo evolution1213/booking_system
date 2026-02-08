@@ -7,6 +7,10 @@
             <div class="card-body">
                 <h2 class="card-title">{{ room.name }}</h2>
 
+                {% if room.location and room.location.latitude and room.location.longitude %}
+                <button type="button" class="btn btn-outline-success mb-3 show-map" data-room-id="{{ room.id }}" data-lat="{{ room.location.latitude }}" data-lng="{{ room.location.longitude }}">Показати на мапі</button>
+                {% endif %}
+
                 <h5 class="mt-3">Опис та особливості</h5>
                 <p>{{ room.features|default:"Опис відсутній" }}</p>
 

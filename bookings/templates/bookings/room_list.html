@@ -3,35 +3,33 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="m-0">Доступні кімнати</h2>
-            <form method="get" class="d-flex" style="gap: .5rem;">
-                {{ filter_form.type.label_tag }}
-                {{ filter_form.type }}
-                <button class="btn btn-outline-secondary" type="submit">Фільтр</button>
-            </form>
-        </div>
-        <div class="row">
-            {% for room in rooms %}
-            <div class="col-md-6 mb-3">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">{{ room.name }}</h5>
-                        <p class="card-text">
-                            <strong>Вмістимість:</strong> {{ room.capacity }} осіб<br>
-                            <strong>Ціна:</strong> {{ room.price_per_hour }} грн/год
-                        </p>
-                        <p class="text-muted small">{{ room.features }}</p>
-                        <a href="{% url 'room_detail' room.id %}" class="btn btn-sm btn-primary mt-2">Деталі / Забронювати</a>
-                    </div>
-                </div>
+        <div class="d-flex justify-content-between align-items-center mb-3 rooms-header">
+            <div>
+              <h2 class="m-0 rooms-title">Доступні кімнати <span class="accent-dot" aria-hidden="true">●</span></h2>
+              <p class="rooms-subtitle text-muted small mb-0">Обирай найкраще місце для події</p>
             </div>
-            {% endfor %}
+            <div class="d-flex" style="gap: .5rem; align-items: center;">
+                <form id="filter-form" method="get" class="d-flex align-items-center" style="gap: .5rem;">
+                    <div class="me-1">{{ filter_form.search }}</div>
+                    <div class="me-1">{{ filter_form.type }}</div>
+                    <div class="me-1">{{ filter_form.city }}</div>
+                    <button class="btn btn-outline-secondary" type="submit">Фільтр</button>
+                </form>
+                <a href="{% url 'random_room' %}?minimal=1" class="btn btn-warning surprise-btn">🎲 Сюрприз!</a>
+                <a class="btn btn-outline-success" href="#" id="show-map" data-rooms-map-url="{% url 'api_rooms_map' %}">🗺️ Мапа</a>
+            </div>
+        </div>
+        <div id="rooms-area">
+            <div id="list-spinner" class="text-center my-3 d-none"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Завантаження...</span></div></div>
+            {% include 'bookings/_room_cards.html' with rooms=rooms %}
+        </div>
+        <div class="mt-4">
+          <p class="text-muted small">Показано {{ rooms.paginator.count|default:rooms|length }} кімнат.</p>
         </div>
     </div>
 
     <div class="col-md-4">
-        <div class="card border-primary shadow">
+        <div class="card border-primary shadow booking-sidebar">
             <div class="card-body">
                 <h4 class="card-title">Забронювати</h4>
                 <form method="post">
@@ -40,7 +38,7 @@
                     <div class="mb-3">
                         <label class="form-label">Оберіть кімнату</label>
                         <select name="room" class="form-select">
-                            {% for room in rooms %}
+                            {% for room in all_rooms %}
                                 <option value="{{ room.id }}">{{ room.name }}</option>
                             {% endfor %}
                         </select>
@@ -67,4 +65,70 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+<!-- Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-fullscreen-sm-down">
+    <div class="modal-content">
+      <div class="modal-header d-flex align-items-center justify-content-between">
+        <h5 class="modal-title">Мапа кімнат</h5>
+        <div>
+          <button id="toggle-markers" type="button" class="btn btn-sm btn-outline-primary me-2">Показати точки</button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body p-0">
+        <div id="mapid" style="height: 70vh; min-height: 400px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Booking Modal from Map -->
+<div class="modal fade" id="mapBookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="map-booking-form" method="post" action="{% url 'random_quick_book' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Бронювання з мапи</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="map-booking-alerts"></div>
+          <input type="hidden" name="room" id="map-modal-room-id">
+          {% if not request.user.is_authenticated %}
+            <div class="mb-3">
+              <label class="form-label">Ім'я</label>
+              <input name="guest_name" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input name="guest_email" type="email" class="form-control">
+            </div>
+          {% endif %}
+          <div class="mb-3">
+            <label class="form-label">Початок</label>
+            <input type="datetime-local" name="start_time" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Кінець</label>
+            <input type="datetime-local" name="end_time" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+          <button type="submit" class="btn btn-primary">Підтвердити</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
